@@ -1,0 +1,61 @@
+# Plan de tests
+
+## Back end
+
+### User Tests
+
+- Completer les tests d'authentification en mettant en place des tests sur le login
+- Mettre en place des tests unitaires pour les fonctions de login du userService
+
+#### Cas de tests unitaires — `UserService.login(String login, String password)`
+
+| # | Cas | Entrées | Mocks | Sortie attendue |
+|---|-----|---------|-------|------------------|
+| 1 | Utilisateur introuvable | `login="unknown"`, `password="password"` | `userRepository.findByLogin("unknown")` → `Optional.empty()` | `IllegalArgumentException` : "Invalid credentials" |
+| 2 | Mot de passe incorrect | `login="login"`, `password="wrong"` | `findByLogin` → `Optional.of(user)` ; `passwordEncoder.matches("wrong", user.getPassword())` → `false` | `IllegalArgumentException` : "Invalid credentials" |
+| 3 | Login réussi | `login="login"`, `password="password"` | `findByLogin` → `Optional.of(user)` ; `passwordEncoder.matches(...)` → `true` ; `jwtService.generateToken(any())` → `"jwt-token"` | Retourne `"jwt-token"` |
+
+#### Cas de tests d'intégration — `POST /api/login` (MockMvc + Testcontainers)
+
+| # | Cas | Entrées (body JSON) | Précondition | Sortie attendue |
+|---|-----|----------------------|--------------|------------------|
+| 1 | Login réussi | `{"login": "existingUser", "password": "validPassword"}` | Utilisateur préalablement créé via `userService.register(...)` | `200 OK`, corps `{"token": "<jwt non vide>"}` |
+| 2 | Login inexistant | `{"login": "doesNotExist", "password": "anyPassword"}` | Aucun utilisateur avec ce login | `400 BAD_REQUEST` (via `RestExceptionHandler` sur `IllegalArgumentException`), message `"Invalid credentials"` |
+| 3 | Mauvais mot de passe | `{"login": "existingUser", "password": "wrongPassword"}` | Utilisateur existant | `400 BAD_REQUEST`, message `"Invalid credentials"` |
+
+### Student Tests
+
+- Mettre en place tout les tests pour le StudentController
+- Faire de même pour le StudenService
+
+#### Cas de tests unitaires — `StudentService` (Mockito, `@Mock StudentRepository`)
+
+| # | Méthode | Cas | Entrées | Mocks | Sortie attendue |
+|---|---------|-----|---------|-------|------------------|
+| 1 | `findAll()` | Liste non vide | — | `studentRepository.findAll()` → `List.of(student1, student2)` | Retourne la liste telle quelle |
+| 2 | `findAll()` | Liste vide | — | `studentRepository.findAll()` → `List.of()` | Retourne une liste vide |
+| 3 | `findById(id)` | Id trouvé | `id=1L` | `findById(1L)` → `Optional.of(student)` | Retourne l'entité `student` |
+| 4 | `findById(id)` | Id introuvable | `id=99L` | `findById(99L)` → `Optional.empty()` | `ResponseStatusException` 404 NOT_FOUND, message `"Student not found with id: 99"` |
+| 5 | `create(student)` | Création valide | `student` avec `firstName`/`lastName` renseignés | `studentRepository.save(student)` → `student` (avec id généré) | Retourne l'entité sauvegardée |
+| 6 | `update(id, studentDetails)` | Id introuvable | `id=99L`, `studentDetails` valide | `findById(99L)` → `Optional.empty()` | `ResponseStatusException` 404 NOT_FOUND (levée par l'appel interne à `findById`) |
+| 7 | `update(id, studentDetails)` | Mise à jour valide | `id=1L`, `studentDetails={firstName:"New", lastName:"Name"}` | `findById(1L)` → `Optional.of(existingStudent)` ; `save(existingStudent)` → entité mise à jour | Retourne l'entité avec `firstName="New"`, `lastName="Name"` |
+| 8 | `save(student)` | Sauvegarde directe | `student` valide | `studentRepository.save(student)` → `student` | Retourne l'entité sauvegardée |
+| 9 | `delete(id)` | Id trouvé | `id=1L` | `findById(1L)` → `Optional.of(student)` | Pas d'exception |
+| 10 | `delete(id)` | Id introuvable | `id=99L` | `findById(99L)` → `Optional.empty()` | `ResponseStatusException` 404 NOT_FOUND |
+
+#### Cas de tests d'intégration — `StudentController` (MockMvc + Testcontainers, JWT requis sauf mention contraire)
+
+| # | Endpoint | Cas | Entrées | Précondition | Sortie attendue |
+|---|----------|-----|---------|--------------|------------------|
+| 1 | `GET /api/students` | Sans token | — | — | `401 UNAUTHORIZED` (toutes les routes `/api/students/**` sont `authenticated()`) |
+| 2 | `GET /api/students` | Liste vide | Header `Authorization: Bearer <token valide>` | Aucun étudiant en base | `200 OK`, corps `[]` |
+| 3 | `GET /api/students` | Liste avec données | idem | 2 étudiants créés en base | `200 OK`, corps = liste de 2 `StudentResponseDTO` |
+| 4 | `GET /api/students/{id}` | Id existant | `id` d'un étudiant créé | Étudiant existant | `200 OK`, corps = `StudentResponseDTO` correspondant |
+| 5 | `GET /api/students/{id}` | Id inexistant | `id=99999` | — | `404 NOT_FOUND` |
+| 6 | `POST /api/students` | Création valide | `{"firstName":"John","lastName":"Doe"}` | — | `200 OK` (⚠️ pas 201), corps = `StudentResponseDTO` avec `id`, `createdAt`, `updatedAt` renseignés |
+| 7 | `PUT /api/students/{id}` | Mise à jour valide | `id` existant, `{"firstName":"Jane","lastName":"Doe"}` | Étudiant existant | `200 OK`, corps mis à jour |
+| 8 | `PUT /api/students/{id}` | Id inexistant | `id=99999`, body valide | — | `404 NOT_FOUND` |
+| 9 | `PATCH /api/students/{id}` | Patch partiel (un seul champ) | `id` existant, `{"firstName":"OnlyFirst"}` | Étudiant existant avec `lastName="Doe"` | `200 OK`, `firstName` mis à jour, `lastName` inchangé (`NullValuePropertyMappingStrategy.IGNORE`) |
+| 10 | `PATCH /api/students/{id}` | Id inexistant | `id=99999`, body `{}` | — | `404 NOT_FOUND` |
+| 11 | `DELETE /api/students/{id}` | Id existant | `id` existant | Étudiant existant | `204 NO_CONTENT` |
+| 12 | `DELETE /api/students/{id}` | Id inexistant | `id=99999` | — | `404 NOT_FOUND` |
