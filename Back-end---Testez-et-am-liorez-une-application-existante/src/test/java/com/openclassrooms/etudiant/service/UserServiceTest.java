@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -122,6 +123,10 @@ public class UserServiceTest {
         String token = userService.login(LOGIN, PASSWORD);
 
         // THEN
+        ArgumentCaptor<UserDetails> userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
+        verify(jwtService).generateToken(userDetailsCaptor.capture());
+        assertThat(userDetailsCaptor.getValue().getUsername()).isEqualTo(LOGIN);
+        assertThat(userDetailsCaptor.getValue().getPassword()).isEqualTo(user.getPassword());
         assertThat(token).isEqualTo("jwt-token");
     }
 }
