@@ -46,17 +46,17 @@
 
 #### Cas de tests d'intégration — `StudentController` (MockMvc + Testcontainers, JWT requis sauf mention contraire)
 
-| # | Endpoint | Cas | Entrées | Précondition | Sortie attendue |
-|---|----------|-----|---------|--------------|------------------|
-| 1 | `GET /api/students` | Sans token | — | — | `401 UNAUTHORIZED` (toutes les routes `/api/students/**` sont `authenticated()`) |
-| 2 | `GET /api/students` | Liste vide | Header `Authorization: Bearer <token valide>` | Aucun étudiant en base | `200 OK`, corps `[]` |
-| 3 | `GET /api/students` | Liste avec données | idem | 2 étudiants créés en base | `200 OK`, corps = liste de 2 `StudentResponseDTO` |
-| 4 | `GET /api/students/{id}` | Id existant | `id` d'un étudiant créé | Étudiant existant | `200 OK`, corps = `StudentResponseDTO` correspondant |
-| 5 | `GET /api/students/{id}` | Id inexistant | `id=99999` | — | `404 NOT_FOUND` |
-| 6 | `POST /api/students` | Création valide | `{"firstName":"John","lastName":"Doe"}` | — | `200 OK` (⚠️ pas 201), corps = `StudentResponseDTO` avec `id`, `createdAt`, `updatedAt` renseignés |
-| 7 | `PUT /api/students/{id}` | Mise à jour valide | `id` existant, `{"firstName":"Jane","lastName":"Doe"}` | Étudiant existant | `200 OK`, corps mis à jour |
-| 8 | `PUT /api/students/{id}` | Id inexistant | `id=99999`, body valide | — | `404 NOT_FOUND` |
-| 9 | `PATCH /api/students/{id}` | Patch partiel (un seul champ) | `id` existant, `{"firstName":"OnlyFirst"}` | Étudiant existant avec `lastName="Doe"` | `200 OK`, `firstName` mis à jour, `lastName` inchangé (`NullValuePropertyMappingStrategy.IGNORE`) |
-| 10 | `PATCH /api/students/{id}` | Id inexistant | `id=99999`, body `{}` | — | `404 NOT_FOUND` |
-| 11 | `DELETE /api/students/{id}` | Id existant | `id` existant | Étudiant existant | `204 NO_CONTENT` |
-| 12 | `DELETE /api/students/{id}` | Id inexistant | `id=99999` | — | `404 NOT_FOUND` |
+| # | Endpoint | Cas | Entrées | Précondition | Sortie attendue | Statut |
+|---|----------|-----|---------|--------------|------------------|--------|
+| 1 | `GET /api/students` | Sans token | — | — | `401 UNAUTHORIZED` (toutes les routes `/api/students/**` sont `authenticated()`) | ✅ Fait |
+| 2 | `GET /api/students` | Liste vide | Header `Authorization: Bearer <token valide>` | Aucun étudiant en base | `200 OK`, corps `[]` | ✅ Fait |
+| 3 | `GET /api/students` | Liste avec données | idem | 2 étudiants créés en base | `200 OK`, corps = liste de 2 `StudentResponseDTO` | ✅ Fait |
+| 4 | `GET /api/students/{id}` | Id existant | `id` d'un étudiant créé | Étudiant existant | `200 OK`, corps = `StudentResponseDTO` correspondant | ✅ Fait |
+| 5 | `GET /api/students/{id}` | Id inexistant | `id=99999` | — | `404 NOT_FOUND` | ✅ Fait |
+| 6 | `POST /api/students` | Création valide | `{"firstName":"John","lastName":"Doe"}` | — | `200 OK` (⚠️ pas 201), corps = `StudentResponseDTO` avec `id`, `createdAt`, `updatedAt` renseignés | ✅ Fait |
+| 7 | `PUT /api/students/{id}` | Mise à jour valide | `id` existant, `{"firstName":"Jane","lastName":"Doe"}` | Étudiant existant | `200 OK`, corps mis à jour | ✅ Fait |
+| 8 | `PUT /api/students/{id}` | Id inexistant | `id=99999`, body valide | — | `404 NOT_FOUND` | ✅ Fait |
+| 9 | `PATCH /api/students/{id}` | Patch partiel (un seul champ) | `id` existant, `{"firstName":"OnlyFirst"}` | Étudiant existant avec `lastName="Doe"` | `200 OK`, `firstName` mis à jour, `lastName` inchangé (`NullValuePropertyMappingStrategy.IGNORE`) | ✅ Fait |
+| 10 | `PATCH /api/students/{id}` | Id inexistant | `id=99999`, body `{}` | — | `404 NOT_FOUND` | ✅ Fait |
+| 11 | `DELETE /api/students/{id}` | Id existant | `id` existant | Étudiant existant | `204 NO_CONTENT` | ✅ Fait |
+| 12 | `DELETE /api/students/{id}` | Id inexistant | `id=99999` | — | `404 NOT_FOUND` | ✅ Fait |
