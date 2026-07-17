@@ -23,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+// Tests d'intégration des endpoints /api/register et /api/login (base MySQL de test via Testcontainers)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
@@ -62,6 +63,7 @@ public class UserControllerTest {
         userRepository.deleteAll();
     }
 
+    // Inscription sans données obligatoires -> 400 Bad Request
     @Test
     public void registerUserWithoutRequiredData() throws Exception {
         // GIVEN
@@ -76,6 +78,7 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
+    // Inscription avec un login déjà utilisé -> 400 Bad Request
     @Test
     public void registerAlreadyExistUser() throws Exception {
         // GIVEN
@@ -101,6 +104,7 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
+    // Inscription avec des données valides -> 201 Created
     @Test
     public void registerUserSuccessful() throws Exception {
         // GIVEN
@@ -119,6 +123,7 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
+    // Connexion avec des identifiants valides -> 200 OK et token présent
     @Test
     public void loginSuccessful() throws Exception {
         // GIVEN
@@ -143,6 +148,7 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.token").isNotEmpty());
     }
 
+    // Connexion avec un login inconnu -> 400 Bad Request + message "Invalid credentials"
     @Test
     public void loginUnknownUser() throws Exception {
         // GIVEN
@@ -160,6 +166,7 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid credentials"));
     }
 
+    // Connexion avec un mauvais mot de passe -> 400 Bad Request + message "Invalid credentials"
     @Test
     public void loginWrongPassword() throws Exception {
         // GIVEN

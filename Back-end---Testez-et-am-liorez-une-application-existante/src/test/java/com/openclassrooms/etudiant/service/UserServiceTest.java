@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+// Tests unitaires de UserService (dépendances mockées, pas de base de données)
 @ExtendWith(SpringExtension.class)
 public class UserServiceTest {
     private static final String FIRST_NAME = "John";
@@ -34,6 +35,7 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
+    // Inscription avec un utilisateur null -> exception
     @Test
     public void test_create_null_user_throws_IllegalArgumentException() {
         // GIVEN
@@ -43,6 +45,7 @@ public class UserServiceTest {
                 () -> userService.register(null));
     }
 
+    // Inscription avec un login déjà existant en base -> exception
     @Test
     public void test_create_already_exist_user_throws_IllegalArgumentException() {
         // GIVEN
@@ -59,6 +62,7 @@ public class UserServiceTest {
                 () -> userService.register(user));
     }
 
+    // Inscription valide -> l'utilisateur encodé est bien sauvegardé
     @Test
     public void test_create_user() {
         // GIVEN
@@ -79,6 +83,7 @@ public class UserServiceTest {
         assertThat(userCaptor.getValue()).isEqualTo(user);
     }
 
+    // Connexion avec un login inconnu -> exception "Invalid credentials"
     @Test
     public void test_login_unknown_user_throws_IllegalArgumentException() {
         // GIVEN
@@ -90,6 +95,7 @@ public class UserServiceTest {
         assertThat(exception.getMessage()).isEqualTo("Invalid credentials");
     }
 
+    // Connexion avec un mauvais mot de passe -> exception "Invalid credentials"
     @Test
     public void test_login_wrong_password_throws_IllegalArgumentException() {
         // GIVEN
@@ -107,6 +113,7 @@ public class UserServiceTest {
         assertThat(exception.getMessage()).isEqualTo("Invalid credentials");
     }
 
+    // Connexion valide -> un token JWT est généré pour l'utilisateur
     @Test
     public void test_login_successful_returns_jwtToken() {
         // GIVEN

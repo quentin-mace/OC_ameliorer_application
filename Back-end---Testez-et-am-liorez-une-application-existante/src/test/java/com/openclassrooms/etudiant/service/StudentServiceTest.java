@@ -19,6 +19,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+// Tests unitaires de StudentService (dépendances mockées, pas de base de données)
 @ExtendWith(SpringExtension.class)
 public class StudentServiceTest {
     private static final String FIRST_NAME = "John";
@@ -29,6 +30,7 @@ public class StudentServiceTest {
     @InjectMocks
     private StudentService studentService;
 
+    // Id inexistant -> exception 404 avec message explicite
     @Test
     public void test_findById_not_found_throws_ResponseStatusException() {
         // GIVEN
@@ -41,6 +43,7 @@ public class StudentServiceTest {
         assertThat(exception.getReason()).isEqualTo("Student not found with id: 99");
     }
 
+    // Création avec un étudiant null -> exception
     @Test
     public void test_create_null_student_throws_IllegalArgumentException() {
         // THEN
@@ -48,6 +51,7 @@ public class StudentServiceTest {
                 () -> studentService.create(null));
     }
 
+    // Mise à jour d'un id inexistant -> exception 404, aucune sauvegarde effectuée
     @Test
     public void test_update_not_found_throws_ResponseStatusException() {
         // GIVEN
@@ -63,6 +67,7 @@ public class StudentServiceTest {
         verify(studentRepository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 
+    // Mise à jour d'un étudiant existant -> les champs sont copiés et sauvegardés
     @Test
     public void test_update_successful_copies_fields_and_saves() {
         // GIVEN
@@ -88,6 +93,7 @@ public class StudentServiceTest {
         assertThat(result.getLastName()).isEqualTo("Name");
     }
 
+    // Suppression d'un étudiant existant -> l'entité est bien supprimée
     @Test
     public void test_delete_found_deletes_entity() {
         // GIVEN
@@ -104,6 +110,7 @@ public class StudentServiceTest {
         verify(studentRepository).delete(student);
     }
 
+    // Suppression d'un id inexistant -> exception 404, aucune suppression effectuée
     @Test
     public void test_delete_not_found_throws_ResponseStatusException() {
         // GIVEN

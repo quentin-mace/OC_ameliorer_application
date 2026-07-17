@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/OC_ameliorer_application.iml" filepath="$PROJECT_DIR$/.idea/OC_ameliorer_application.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Back-end---Testez-et-am-liorez-une-application-existante/etudiant-backend.iml" filepath="$PROJECT_DIR$/Back-end---Testez-et-am-liorez-une-application-existante/etudiant-backend.iml" />
     </modules>
   </component>
 </project>

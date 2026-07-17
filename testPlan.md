@@ -25,8 +25,8 @@
 
 ### Student Tests
 
-- [ ] Mettre en place tout les tests pour le StudentController
-- [ ] Faire de même pour le StudenService
+- [x] Mettre en place tout les tests pour le StudentController
+- [x] Faire de même pour le StudentService
 
 #### Cas de tests unitaires — `StudentService` (Mockito, `@Mock StudentRepository`)
 

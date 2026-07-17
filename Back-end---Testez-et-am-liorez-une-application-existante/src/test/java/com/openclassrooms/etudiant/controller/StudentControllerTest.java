@@ -27,6 +27,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+// Tests d'intégration du CRUD /api/students (authentification requise via token JWT)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
@@ -60,6 +61,7 @@ public class StudentControllerTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create");
     }
 
+    // Crée un utilisateur et récupère un token avant chaque test
     @BeforeEach
     public void beforeEach() {
         User user = new User();
@@ -77,6 +79,7 @@ public class StudentControllerTest {
         userRepository.deleteAll();
     }
 
+    // Appel sans token -> 401 Unauthorized
     @Test
     public void findAllWithoutTokenReturnsUnauthorized() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(URL))
@@ -84,6 +87,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
+    // Aucun étudiant en base -> liste vide
     @Test
     public void findAllReturnsEmptyList() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(URL)
@@ -94,6 +98,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
     }
 
+    // Deux étudiants en base -> liste de taille 2
     @Test
     public void findAllReturnsStudentsList() throws Exception {
         Student student1 = new Student();
@@ -112,6 +117,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(2));
     }
 
+    // Etudiant existant -> retourne ses détails
     @Test
     public void findByIdExistingReturnsStudent() throws Exception {
         Student student = new Student();
@@ -128,6 +134,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastName").value("Martin"));
     }
 
+    // Id inexistant -> 404 Not Found
     @Test
     public void findByIdNotFoundReturnsNotFound() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(URL + "/99999")
@@ -136,6 +143,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    // Création avec des données valides -> étudiant créé avec id et dates
     @Test
     public void createValidReturnsCreatedStudent() throws Exception {
         StudentDTO studentDTO = new StudentDTO();
@@ -156,6 +164,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.updatedAt").isNotEmpty());
     }
 
+    // Mise à jour d'un étudiant existant -> nouvelles valeurs retournées
     @Test
     public void updateExistingReturnsUpdatedStudent() throws Exception {
         Student student = new Student();
@@ -179,6 +188,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastName").value("Doe"));
     }
 
+    // Mise à jour d'un id inexistant -> 404 Not Found
     @Test
     public void updateNotFoundReturnsNotFound() throws Exception {
         StudentDTO studentDTO = new StudentDTO();
@@ -194,6 +204,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    // Patch partiel -> seul le champ fourni change, le reste est conservé
     @Test
     public void patchPartialUpdatesOnlyGivenField() throws Exception {
         Student student = new Student();
@@ -215,6 +226,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastName").value("Doe"));
     }
 
+    // Patch d'un id inexistant -> 404 Not Found
     @Test
     public void patchNotFoundReturnsNotFound() throws Exception {
         StudentPatchDTO patchDTO = new StudentPatchDTO();
@@ -228,6 +240,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    // Suppression d'un étudiant existant -> 204 No Content
     @Test
     public void deleteExistingReturnsNoContent() throws Exception {
         Student student = new Student();
@@ -241,6 +254,7 @@ public class StudentControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
+    // Suppression d'un id inexistant -> 404 Not Found
     @Test
     public void deleteNotFoundReturnsNotFound() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete(URL + "/99999")
