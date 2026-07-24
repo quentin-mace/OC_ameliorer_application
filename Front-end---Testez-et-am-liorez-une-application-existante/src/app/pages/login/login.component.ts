@@ -8,6 +8,7 @@ import {Login} from '../../core/models/Login';
 import {AuthService} from '../../core/service/auth.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {FlashMessageService} from '../../core/service/flash-message.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
   private flashMessageService = inject(FlashMessageService);
   loginForm: FormGroup = new FormGroup({});
   submitted: boolean = false;
@@ -56,16 +58,15 @@ export class LoginComponent implements OnInit {
     this.userService.login(loginUser)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-      next: (response) => {
-        this.authService.setToken(response.token);
-        alert('SUCCESS!! :-)');
-        // todo : redirect vers la liste du crud
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorMessage = error.status === 401
-          ? 'Identifiants incorrects'
-          : 'Une erreur est survenue'
-      }
+        next: (response) => {
+          this.authService.setToken(response.token);
+          this.router.navigate(['/students']);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage = error.status === 401
+            ? 'Identifiants incorrects'
+            : 'Une erreur est survenue'
+        }
   });
   }
 
