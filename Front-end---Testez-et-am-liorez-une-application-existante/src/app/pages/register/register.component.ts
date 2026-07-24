@@ -5,6 +5,9 @@ import { MaterialModule } from '../../shared/material.module';
 import { UserService } from '../../core/service/user.service';
 import { Register } from '../../core/models/Register';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {Router} from '@angular/router';
+import {HttpErrorResponse} from '@angular/common/http';
+import {FlashMessageService} from '../../core/service/flash-message.service';
 
 @Component({
   selector: 'app-register',
@@ -17,8 +20,11 @@ export class RegisterComponent implements OnInit {
   private userService = inject(UserService);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
+  private flashMessageService = inject(FlashMessageService);
   registerForm: FormGroup = new FormGroup({});
   submitted: boolean = false;
+  errorMessage: string | null = null;
 
   ngOnInit() {
     this.registerForm = this.formBuilder.group(
@@ -40,6 +46,8 @@ export class RegisterComponent implements OnInit {
     if (this.registerForm.invalid) {
       return;
     }
+    this.errorMessage = null;
+
     const registerUser: Register = {
       firstName: this.registerForm.get('firstName')?.value,
       lastName: this.registerForm.get('lastName')?.value,
@@ -48,12 +56,17 @@ export class RegisterComponent implements OnInit {
     };
     this.userService.register(registerUser)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(
-      () => {
-        alert('SUCCESS!! :-)');
-        // TODO : router l'utilisateur vers la page de login
-      },
-    );
+      .subscribe({
+        next: () => {
+          this.flashMessageService.set('Inscription réussie, vous pouvez vous connecter.')
+          this.router.navigate(['/login']);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorMessage = error.status === 400
+            ? "Cet identifiant est déja utilisé"
+            : "Une erreur est survenue"
+        }
+      })
   }
 
   onReset(): void {

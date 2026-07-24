@@ -1,5 +1,11 @@
 <div class="card m-3">
   <h5 class="card-header">Login Form</h5>
+  @if (null !== successMessage) {
+    <div class="alert alert-success" role="alert">
+      {{ successMessage }}
+    </div>
+
+  }
   <div class="card-body">
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
@@ -41,7 +47,7 @@
         </div>
       }
       <div class="text-center">
-        <button class="btn btn-primary mr-1">Register</button>
+        <button class="btn btn-primary mr-1">Login</button>
         <button class="btn btn-secondary" type="reset" (click)="onReset()">
           Cancel
         </button>

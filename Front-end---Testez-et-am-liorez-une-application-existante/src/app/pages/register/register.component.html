@@ -69,6 +69,11 @@
           </div>
         }
       </div>
+      @if (null !== errorMessage) {
+        <div class="alert alert-danger" role="alert">
+          {{ errorMessage }}
+        </div>
+      }
       <div class="text-center">
         <button class="btn btn-primary mr-1">Register</button>
         <button class="btn btn-secondary" type="reset" (click)="onReset()">

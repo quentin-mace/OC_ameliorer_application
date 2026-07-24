@@ -3,11 +3,11 @@ import {CommonModule} from '@angular/common';
 import {MaterialModule} from '../../shared/material.module';
 import {UserService} from '../../core/service/user.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {Register} from '../../core/models/Register';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {Login} from '../../core/models/Login';
 import {AuthService} from '../../core/service/auth.service';
 import {HttpErrorResponse} from '@angular/common/http';
+import {FlashMessageService} from '../../core/service/flash-message.service';
 
 @Component({
   selector: 'app-login',
@@ -21,9 +21,11 @@ export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private flashMessageService = inject(FlashMessageService);
   loginForm: FormGroup = new FormGroup({});
   submitted: boolean = false;
   errorMessage: string | null = null;
+  successMessage: string | null = null;
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group(
@@ -32,6 +34,8 @@ export class LoginComponent implements OnInit {
         password: ['', Validators.required]
       },
     );
+
+    this.successMessage = this.flashMessageService.consume();
   }
 
   get form() {
